@@ -1,0 +1,18 @@
+Package: robfpqr
+Type: Package
+Title: Robust Functional Partial Quantile Regression
+Version: 1.0
+Depends: R (>= 3.5.0), fda, MASS, quantreg
+Imports: expm, fda.usc, goffda, pcaPP
+LazyLoad: yes
+ByteCompile: TRUE
+Encoding: UTF-8
+LazyData: true
+Authors@R: c(
+	person("Ufuk", "Beyaztas", email="ufukbeyaztas@gmail.com", role=c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-5208-4950")),
+	person("Mujgan", "Tez", role="aut", comment = c(ORCID = "0000-0002-8633-1980")),
+	person("Han Lin", "Shang", role="aut", comment = c(ORCID = "0000-0003-1769-6430"))
+	)
+Maintainer: Ufuk Beyaztas <ufukbeyaztas@gmail.com>
+Description: Functions for implementing robust methods for functional linear quantile regression.
+License: GPL-3
