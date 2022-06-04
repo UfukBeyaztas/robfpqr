@@ -37,7 +37,7 @@ dgp <- function(n.train, n.test, n.gp, data.type = c("normal", "contaminated"),
 
   err = rnorm((n.train+n.test), mean=0, sd=1)
   if(data.type == "contaminated"){
-    err[out.indx] <- rnorm(n.out, mean=20, sd=1)
+    err[out.indx] <- rnorm(n.out, mean=15, sd=1)
   }
 
   fY = inprod.fdata(fX, vBeta)
