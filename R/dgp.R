@@ -13,14 +13,11 @@ dgp <- function(n.train, n.test, n.gp, data.type = c("normal", "contaminated"),
   }
 
   phi <- list()
-  phi2 <- list()
   for(i in 1:5){
     phi[[i]] <- sin(i * pi * gpX) - cos(i * pi * gpX)
-    phi2[[i]] <- 2*sin(2*i * pi * gpX) - cos(i * pi * gpX)
   }
 
   fX <- Reduce("+", lapply(1:5, function(k){ksi[[k]] %*% t(phi[[k]])}))
-  fX2 <- Reduce("+", lapply(1:5, function(k){ksi[[k]] %*% t(phi2[[k]])}))
   if(data.type == "contaminated"){
     if(out.type == "yx"){
       fX[out.indx,] = fX[out.indx,] +
