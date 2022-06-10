@@ -18,12 +18,14 @@ fpcr <- function(y, x, tau, nbf, gp, ncp, model.type = c("linear", "quantile"))
   resids <- y - fitteds
 
   model.details <- list()
-  model.details[[1]] <- ncp
-  model.details[[2]] <- gp
-  model.details[[3]] <- nbf
-  model.details[[4]] <- pca.results$PCAcoef
-  model.details[[5]] <- pca.results$evalbase
-  model.details[[6]] <- pca.results$bs_basis
+  model.details$ncp <- ncp
+  model.details$gp <- gp
+  model.details$nbf <- nbf
+  model.details$PCAcoef <- pca.results$PCAcoef
+  model.details$evalbase <- pca.results$evalbase
+  model.details$bs_basis <- pca.results$bs_basis
+
+
 
   return(list(y = y, x = x, fitted.values = fitteds, residuals = resids,
               coeffs = coeffs, model.details = model.details))
