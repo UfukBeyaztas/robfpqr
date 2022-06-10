@@ -1,9 +1,9 @@
-\name{get.fpqr.coeffs}
-\alias{get.fpqr.coeffs}
+\name{get.fpqr.coeff}
+\alias{get.fpqr.coeff}
 \title{Get the estimated regression coefficient functions for functional partial quantile regression model}
 \description{This function is used to obtain the estimated regression coefficient function \eqn{\beta(t,~\tau)} for scalar-on-function linear quantile regression model based on output object obtained from \code{\link{fpqr}}).}
 \usage{
-get.fpqr.coeffs(object)
+get.fpqr.coeff(object)
 }
 \arguments{
   \item{object}{The output object of \code{\link{fpqr}}.}
@@ -18,6 +18,6 @@ x <- sim.data$x.train
 gp <- seq(0, 1, length.out = 201) # grid points of X
 model.classic <- fpqr(y=y, x=x, tau=0.5, h=4, nbasis=20, gp=gp, method.type = "classical")
 model.robust <- fpqr(y=y, x=x,tau=0.5, h=4, nbasis=20, gp=gp, method.type = "robust")
-coeff.func.clsc <- get.fpqr.coeffs(object = model.classic)
-coeff.func.rbst <- get.fpqr.coeffs(object = model.robust)
+coeff.func.clsc <- get.fpqr.coeff(object = model.classic)
+coeff.func.rbst <- get.fpqr.coeff(object = model.robust)
 }
