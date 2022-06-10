@@ -1,8 +1,8 @@
-get.fpcr.coefs <- function(object)
+get.fpcr.coeff <- function(object)
 {
-  gp <- object$model.details[[2]]
-  PCAcoef <- object$model.details[[4]]
-  evalbase <- object$model.details[[5]]
+  gp <- object$model.details$gp
+  PCAcoef <- object$model.details$PCAcoef
+  evalbase <- object$model.details$evalbase
   coeffs <- as.matrix(object$coeffs[-1])
 
   f.coeff = evalbase %*% (PCAcoef$coefs %*% coeffs)
