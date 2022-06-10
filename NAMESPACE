@@ -2,8 +2,8 @@ export(
 "dgp",
 "fpcr", 
 "fpqr", 
-"get.fpcr.coefs", 
-"get.fpqr.coeffs", 
+"get.fpcr.coeff", 
+"get.fpqr.coeff", 
 "predict_fpcr", 
 "predict_fpqr"
 )
