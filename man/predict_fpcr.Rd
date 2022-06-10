@@ -14,8 +14,9 @@ predict_fpcr(object, xnew)
 }
 \author{Ufuk Beyaztas, Mujgan Tez and Han Lin Shang}
 \examples{
+set.seed(123)
 sim.data <- dgp(n.train = 420, n.test = 180, n.gp = 201, data.type = "contaminated",
-            out.type = "yx", out.perc = 0.1)
+                out.type = "yx", out.perc = 0.1)
 y.train <- sim.data$y.train
 y.test <- sim.data$y.test
 x.train <- sim.data$x.train
@@ -24,7 +25,12 @@ gp <- seq(0, 1, length.out = 201) # grid points of X
 model.linear <- fpcr(y=y.train, x=x.train, nbf=20, gp=gp,
                      ncp=4, model.type = "linear")
 model.quantile <- fpcr(y=y.train, x=x.train, tau=0.5, nbf=20,
-                     gp=gp, ncp=4, model.type = "quantile")
+                       gp=gp, ncp=4, model.type = "quantile")
 predict.linear <- predict_fpcr(object=model.linear, xnew=x.test)
 predict.quantile <- predict_fpcr(object=model.quantile, xnew=x.test)
+# Mean squared prediction error
+mspe.linear <- mean((predict.linear-y.test)^2)
+mspe.quantile <- mean((predict.quantile-y.test)^2)
+round(mspe.linear, 4) # 3.0747
+round(mspe.quantile, 4) # 3.3102
 }
