@@ -1,9 +1,9 @@
-\name{get.fpcr.coefs}
-\alias{get.fpcr.coefs}
+\name{get.fpcr.coeff}
+\alias{get.fpcr.coeff}
 \title{Get the estimated regression coefficient functions for scalar-on-function linear and/or quantile regression model}
 \description{This function is used to obtain the estimated regression coefficient function \eqn{\beta(t)} or \eqn{\beta(t,~\tau)} for scalar-on-function linear and/or quantile regression model based on output object obtained from \code{\link{fpcr}}).}
 \usage{
-get.fpcr.coefs(object)
+get.fpcr.coeff(object)
 }
 \arguments{
   \item{object}{The output object of \code{\link{fpcr}}.}
@@ -21,6 +21,6 @@ model.linear <- fpcr(y=y, x=x, nbf=20, gp=gp, ncp=4,
                      model.type = "linear")
 model.quantile <- fpcr(y=y, x=x, tau=0.5, nbf=20, gp=gp, ncp=4,
                      model.type = "quantile")
-linear.coeff.fun <- get.fpcr.coefs(object = model.linear)
-quantile.coeff.fun <- get.fpcr.coefs(object = model.quantile)
+linear.coeff.fun <- get.fpcr.coeff(object = model.linear)
+quantile.coeff.fun <- get.fpcr.coeff(object = model.quantile)
 }
