@@ -12,8 +12,9 @@ predict_fpqr(object, xnew)
 \value{An \eqn{n_{test} \times 1}-dimensional matrix of predicted values of the scalar response variable for the given set of new functional predictor \code{xnew}. Here, \eqn{n_{test}}, the number of rows of the matrix of predicted values, equals to the number of rows of \code{xnew}.}
 \author{Ufuk Beyaztas, Mujgan Tez and Han Lin Shang}
 \examples{
+set.seed(123)
 sim.data <- dgp(n.train = 420, n.test = 180, n.gp = 201, data.type = "contaminated",
-            out.type = "yx", out.perc = 0.1)
+                out.type = "yx", out.perc = 0.1)
 y.train <- sim.data$y.train
 y.test <- sim.data$y.test
 x.train <- sim.data$x.train
@@ -25,4 +26,9 @@ model.robust <- fpqr(y=y.train, x=x.train,tau=0.5, h=4, nbasis=20, gp=gp,
                      method.type = "robust")
 predict.classic <- predict_fpqr(object=model.classic, xnew=x.test)
 predict.robust <- predict_fpqr(object=model.robust, xnew=x.test)
+# Mean squared prediction error
+mspe.classic <- mean((predict.classic-y.test)^2)
+mspe.robust <- mean((predict.robust-y.test)^2)
+round(mspe.classic, 4) # 3.2151
+round(mspe.robust, 4) # 1.3902
 }
