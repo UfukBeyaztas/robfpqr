@@ -9,11 +9,11 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
 
   BS.sol <- getAmat(data = x, nbf = nbasis, gp = gp)
   x <- BS.sol$Amat
-  n <- dim(x)[1]
-  p <- dim(y)[2]
+  n <- dim(x)[2]
 
-  xs <- scale_fun(data = x, method.type = method.type)
-  ys <- as.matrix(y)
+  yx.s <- scale_fun(data = cbind(y, x), method.type = method.type)
+  xs <- yx.s[,-1]
+  ys <- as.matrix(yx.s[,1])
 
   if(method.type == "classical")
   {
@@ -21,9 +21,16 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
   }else if(method.type == "robust")
   {
 
-    wx <- sqrt(apply(xs^2, 1, sum))
+    wx <- sqrt(apply(yx.s[,-1]^2, 1, sum))
     wx <- wx / median(wx)
+    wy <- abs(yx.s[,1])
     zerows <- vector(length=0)
+
+    if(length(wy) / 2 > sum(wy == 0)){
+      wy <- wy / (1.4826 * median(wy))
+    }else{
+      wy <- wy / (1.4826 * median(wy[wy != 0]))
+    }
 
     probct <- qnorm(probp1)
     hampelb <- qnorm(hampelp2)
@@ -33,26 +40,43 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
     wx[which(wx > hampelb & wx <= hampelr)] <- probct * (hampelr - abs(wx[which(wx > hampelb & wx <= hampelr)]))/
       (hampelr - hampelb) * 1 / abs(wx[which(wx > hampelb & wx <= hampelr)])
     wx[which(wx > hampelr)] <- 0
+    wy[which(wy <= probct)] <- 1
+    wy[which(wy > probct & wy <= hampelb)] <- probct/abs(wy[which(wy > probct & wy <= hampelb)])
+    wy[which(wy > hampelb & wy <= hampelr)] <- probct * (hampelr - abs(wy[which(wy > hampelb & wy <= hampelr)]))/
+      (hampelr - hampelb) * 1 / abs(wy[which(wy > hampelb & wy <= hampelr)])
+    wy[which(wy > hampelr)] <- 0
 
-    if(any(wx < 1e-6))
-    {
-      w0 <- which(wx < 1e-6)
-      wx <- replace(wx, list = w0, values = 1e-6)
-    }else {
-      wx <- wx
+    w <- wx * wy
+
+    if(any(w < 1e-6)){
+      w0 <- which(w < 1e-6)
+      w <- replace(w, list=w0, values = 1e-6)
+      we <- w
+    } else {
+      wxe <- wx
+      wye <- wy
+      we <- w
     }
 
-    xs.w <- as.data.frame(xs) * sqrt(wx)
+    yx.w <- as.data.frame(yx.s) * sqrt(we)
     loops <- 1
     rold <- 10^-5
     difference <- 1
 
     while((difference > conv) && loops < maxit)
     {
-      m.pqr <- pqr(y = ys, x = xs.w, tau = tau, h = h, method.type = method.type)
+      m.pqr <- pqr(y = as.matrix(yx.w[,1]), x = as.matrix(yx.w[,-1]),
+                   tau = tau, h = h, method.type = method.type)
       yp <- m.pqr$fitted.values
+      r <- yx.s[,1] - yp
       b <- m.pqr$d.coef
-      Tpls <- as.data.frame(m.pqr$T) / sqrt(wx)
+      Tpls <- as.data.frame(m.pqr$T) / sqrt(we)
+
+      if (length(r) / 2 > sum(r == 0)){
+        r <- abs(r) / (1.4826 * median(abs(r)))
+      }else{
+        r <- abs(r) / (1.4826 * median(abs(r[r != 0])))
+      }
 
       dt <- scale_fun(data = Tpls, method.type = method.type)
       wtn <- sqrt(apply(dt^2, 1, sum))
@@ -61,6 +85,13 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
       probct <- qnorm(probp1)
       hampelb <- qnorm(hampelp2)
       hampelr <- qnorm(hampelp3)
+      wye <- r
+      wye[which(r <= probct)] <- 1
+      wye[which(r > probct & r <= hampelb)] <- probct / abs(r[which(r > probct & r <= hampelb)])
+      wye[which(r > hampelb & r <= hampelr)] <- probct * (hampelr-abs(r[which(r > hampelb & r <= hampelr)]))/
+        (hampelr - hampelb) * 1 / abs(r[which(r > hampelb & r <= hampelr)])
+      wye[which(r > hampelr)] <- 0
+      wye <- as.numeric(wye)
 
       probct <- qchisq(probp1, h)
       hampelb <- qchisq(hampelp2, h)
@@ -74,36 +105,40 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
 
       difference <- abs(sum(b^2) - rold)/rold
       rold <- sum(b^2)
-      wx <- wx * wte
+      we <- wye * wte
 
-      if(any(wx < 1e-6)){
-        w0 <- which(wx < 1e-6)
-        wx <- replace(wx, list = w0, values = 1e-6)
+      if(any(we < 1e-6)){
+        w0 <- which(we < 1e-6)
+        we <- replace(we, list = w0, values = 1e-6)
         zerows <- unique(c(zerows, as.numeric(names(w0))))
       }
 
-      xs.w <- as.data.frame(xs) * sqrt(wx)
+      if(length(zerows) >= (n/2)){
+        break
+      }
+
+      yx.w <- as.data.frame(yx.s) * sqrt(we)
 
       loops <- loops + 1
     }
 
     if (difference > conv){
-      warning(paste("Convergence was not ashieved. The scaled difference between norms of the coefficient vectors is ",
+      warning(paste("Convergence was not achieved. The scaled difference between norms of the coefficient vectors is ",
                     round(difference, digits=4)))
     }
 
-    w <- wx
+    w <- we
     w[zerows] <- 0
     wt <- wte
     wt[zerows] <- 0
+    wy <- wye
+    wy[zerows] <- 0
   }
 
   P <- m.pqr$P
   R <- m.pqr$R
   W <- m.pqr$W
   T <- m.pqr$T
-
-  V = t(solve(t(T)%*%T)%*%t(T)%*%BS.sol$Amat)
 
   final.model <- rq(y0~T, tau)
   pqr.coefs <- as.matrix(final.model$coefficients)
@@ -114,16 +149,16 @@ fpqr <- function(y, x, tau, h, nbasis, gp, method.type = c("classical","robust")
   resids <- y0 - fitteds
 
   model.details <- list()
-  model.details[[1]] <- BS.sol$Amat
-  model.details[[2]] <- BS.sol$bs_basis
-  model.details[[3]] <- BS.sol$inp_mat
-  model.details[[4]] <- BS.sol$sinp_mat
-  model.details[[5]] <- BS.sol$evalbase
-  model.details[[6]] <- nbasis
-  model.details[[7]] <- gp
-  model.details[[8]] <- method.type
+  model.details$Amat <- BS.sol$Amat
+  model.details$bs_basis <- BS.sol$bs_basis
+  model.details$inp_mat <- BS.sol$inp_mat
+  model.details$sinp_mat <- BS.sol$sinp_mat
+  model.details$evalbase <- BS.sol$evalbase
+  model.details$nbasis <- nbasis
+  model.details$gp <- gp
+  model.details$method.type <- method.type
 
 
   return(list(y = y0, x = x0, fitted.values = fitteds, coeffs = final.coefs, intercept = intercept,
-              pqr.coefs = pqr.coefs, V = V, model.details = model.details))
+              pqr.coefs = pqr.coefs, V = W, model.details = model.details))
 }
